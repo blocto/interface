@@ -1,3 +1,4 @@
+import { BloctoConnector } from '@blocto/web3-react-connector'
 import { ChainId } from '@uniswap/sdk-core'
 import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
 import { initializeConnector } from '@web3-react/core'
@@ -7,6 +8,7 @@ import { Network } from '@web3-react/network'
 import { Actions, Connector } from '@web3-react/types'
 import GNOSIS_ICON from 'assets/images/gnosis.png'
 import UNISWAP_LOGO from 'assets/svg/logo.svg'
+import BLOCTO_ICON from 'assets/wallets/blocto.png'
 import COINBASE_ICON from 'assets/wallets/coinbase-icon.svg'
 import UNIWALLET_ICON from 'assets/wallets/uniswap-wallet-icon.png'
 import WALLET_CONNECT_ICON from 'assets/wallets/walletconnect-icon.svg'
@@ -79,6 +81,25 @@ export const gnosisSafeConnection: Connection = {
   type: ConnectionType.GNOSIS_SAFE,
   getIcon: () => GNOSIS_ICON,
   shouldDisplay: () => false,
+}
+
+const [web3Blocto, web3BloctoHooks] = initializeConnector<BloctoConnector>(
+  (actions) =>
+    new BloctoConnector({
+      actions,
+      options: {
+        chainId: ChainId.MAINNET,
+        rpc: RPC_URLS[ChainId.MAINNET][0],
+      },
+    })
+)
+export const bloctoConnection: Connection = {
+  getName: () => 'Blocto',
+  connector: web3Blocto,
+  hooks: web3BloctoHooks,
+  type: ConnectionType.BLOCTO,
+  getIcon: () => BLOCTO_ICON,
+  shouldDisplay: () => true,
 }
 
 export const walletConnectV2Connection: Connection = new (class implements Connection {
@@ -184,6 +205,7 @@ const coinbaseWalletConnection: Connection = {
 }
 
 export const connections = [
+  bloctoConnection,
   gnosisSafeConnection,
   uniwalletWCV2ConnectConnection,
   injectedConnection,
@@ -216,6 +238,8 @@ export function getConnection(c: Connector | ConnectionType) {
         return deprecatedNetworkConnection
       case ConnectionType.GNOSIS_SAFE:
         return gnosisSafeConnection
+      case ConnectionType.BLOCTO:
+        return bloctoConnection
     }
   }
 }
